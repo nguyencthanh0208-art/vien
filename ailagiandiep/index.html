@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI LÀ GIÁN ĐIỆP - Phiên Bản Online</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(20, 20, 40, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(102, 126, 234, 0.3);
+            padding: 30px;
+            color: #fff;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+            }
+        }
+
+        .subtitle {
+            font-size: 0.9em;
+            color: #b0b8ff;
+            margin-top: 5px;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            color: #b0b8ff;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #fff;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.2);
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        input::placeholder {
+            color: #7a8bb0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        button:hover:before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(102, 126, 234, 0.3);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: #fff;
+            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(245, 87, 108, 0.6);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+            box-shadow: 0 5px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(79, 172, 254, 0.6);
+        }
+
+        .player-name {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 30px 0 20px;
+            text-align: center;
+            animation: bounce 0.6s ease-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .word-display {
+            background: linear-gradient(135deg, rgba(245, 87, 108, 0.2) 0%, rgba(240, 147, 251, 0.2) 100%);
+            border: 2px solid rgba(245, 87, 108, 0.5);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .word-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(245, 87, 108, 0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .word-label {
+            font-size: 0.9em;
+            color: #b0b8ff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .word-text {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #fff;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 30px rgba(245, 87, 108, 0.5);
+            animation: slideInDown 0.6s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .order-list {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .order-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .order-list::-webkit-scrollbar-track {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .order-list::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 10px;
+        }
+
+        .order-text {
+            color: #b0b8ff;
+            font-size: 1.1em;
+            font-weight: 500;
+            line-height: 1.8;
+            word-break: break-all;
+        }
+
+        .players-scroll {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+            padding-right: 10px;
+        }
+
+        .players-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .players-scroll::-webkit-scrollbar-track {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .players-scroll::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 10px;
+        }
+
+        .player-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .player-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .player-item.eliminated {
+            opacity: 0.5;
+            background: rgba(100, 100, 100, 0.1);
+            border-color: rgba(100, 100, 100, 0.3);
+            pointer-events: none;
+        }
+
+        .player-item.eliminated::before {
+            content: '💀 ';
+        }
+
+        .player-name-text {
+            font-weight: bold;
+            color: #fff;
+            font-size: 1.1em;
+        }
+
+        .player-role {
+            font-size: 0.85em;
+            color: #b0b8ff;
+            margin-top: 5px;
+        }
+
+        .status-text {
+            text-align: center;
+            font-size: 1.1em;
+            color: #b0b8ff;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-text {
+            background: rgba(102, 126, 234, 0.15);
+            border: 2px solid rgba(102, 126, 234, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #fff;
+            font-size: 0.95em;
+            line-height: 1.6;
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .result-name {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-top: 5px;
+            color: #fff;
+        }
+
+        .badge.spy {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .badge.white {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .badge.civilian {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: rgba(79, 172, 254, 0.1);
+            border-left: 4px solid #4facfe;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #b0b8ff;
+            font-size: 0.95em;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 20px;
+                padding: 20px;
+            }
+
+            .title {
+                font-size: 1.8em;
+            }
+
+            .word-text {
+                font-size: 2.5em;
+            }
+
+            button {
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+
+            .player-name {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🕵️ AI LÀ GIÁN ĐIỆP</h1>
+            <p class="subtitle">Phiên bản Chiến Thuật Online</p>
+        </div>
+
+        <!-- Screen 1: Main Menu -->
+        <div class="screen active" id="mainMenu">
+            <div class="input-group">
+                <label>👥 Tổng số người chơi</label>
+                <input type="number" id="totalPlayers" min="3" max="20" value="4">
+            </div>
+            <div class="input-group">
+                <label>🕵️ Số Gián Điệp</label>
+                <input type="number" id="spyCount" min="1" max="10" value="1">
+            </div>
+            <div class="input-group">
+                <label>👽 Số Mũ Trắng</label>
+                <input type="number" id="whiteCount" min="0" max="10" value="1">
+            </div>
+            <div class="button-group">
+                <button class="btn-primary" onclick="goToNameInput()">TIẾP TỤC ➜</button>
+            </div>
+        </div>
+
+        <!-- Screen 2: Name Input -->
+        <div class="screen" id="nameInput">
+            <div class="info-box">
+                ℹ️ Nhập tên người chơi (có thể để trống để dùng tên mặc định)
+            </div>
+            <div class="players-scroll" id="nameInputContainer"></div>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="goToMainMenu()">⬅ QUAY LẠI</button>
+                <button class="btn-primary" onclick="startGame()">BẮT ĐẦU 🎮</button>
+            </div>
+        </div>
+
+        <!-- Screen 3: Word Reveal -->
+        <div class="screen" id="wordReveal">
+            <p class="player-name" id="playerNameDisplay">Người chơi</p>
+            <p class="status-text" id="statusText">🔐 Chuyền máy để xem từ bí mật</p>
+            <div class="word-display" id="wordDisplay" style="display:none;">
+                <div class="word-label">TỪ CỦA BẠN LÀ:</div>
+                <div class="word-text" id="wordText">?</div>
+            </div>
+            <div class="button-group">
+                <button class="btn-primary" id="revealBtn" onclick="revealWord()">👀 XEM TỪ</button>
+                <button class="btn-success" id="nextBtn" onclick="nextPlayer()" style="display:none;">✓ ĐÃ NHỚ</button>
+            </div>
+        </div>
+
+        <!-- Screen 4: Discussion -->
+        <div class="screen" id="discussion">
+            <h2 style="text-align:center; margin-bottom:20px;">📋 THỨ TỰ PHÁT BIỂU</h2>
+            <div class="order-list">
+                <div class="order-text" id="orderList">Đang tải...</div>
+            </div>
+            <h2 style="text-align:center; margin:30px 0 20px; font-size:1.2em;">🎯 LOẠI NGƯỜI CHƠI</h2>
+            <div class="players-scroll" id="playersContainer"></div>
+            <div class="button-group">
+                <button class="btn-danger" onclick="showFinalResult()">🏁 XEM KẾT QUẢ</button>
+                <button class="btn-secondary" onclick="restartGame()">🔄 CHƠI VÁN MỚI</button>
+            </div>
+        </div>
+
+        <!-- Screen 5: Final Result -->
+        <div class="screen" id="finalResult">
+            <h2 style="text-align:center; margin-bottom:20px;">🎊 DANH TÍNH CUỐI CÙNG</h2>
+            <div id="resultContainer"></div>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="goToMainMenu()">🏠 TRANG CHỦ</button>
+                <button class="btn-primary" onclick="restartGame()">🔄 CHƠI VÁN MỚI</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ GAME STATE ============
+        let gameState = {
+            totalPlayers: 4,
+            spyCount: 1,
+            whiteCount: 1,
+            players: [],
+            currentRevealIndex: 0,
+            wordPairs: [],
+            currentWord: ''
+        };
+
+        // ============ LOAD WORDS FROM JSON ============
+        async function loadWords() {
+            try {
+                const response = await fetch('words.json');
+                const data = await response.json();
+                gameState.wordPairs = data.wordPairs;
+                console.log('✅ Đã tải', gameState.wordPairs.length, 'cặp từ');
+            } catch (error) {
+                console.log('⚠️ Không tìm thấy words.json, dùng từ mặc định');
+                gameState.wordPairs = [
+                    ["Bánh mì", "Bánh bao"],
+                    ["Hà Nội", "Sài Gòn"],
+                    ["Mùa hè", "Mùa đông"],
+                    ["Mặt trời", "Mặt trăng"],
+                    ["Cafe", "Trà"]
+                ];
+            }
+        }
+
+        // ============ NAVIGATION FUNCTIONS ============
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goToMainMenu() {
+            showScreen('mainMenu');
+        }
+
+        function goToNameInput() {
+            const total = parseInt(document.getElementById('totalPlayers').value);
+            const spy = parseInt(document.getElementById('spyCount').value);
+            const white = parseInt(document.getElementById('whiteCount').value);
+
+            if (total < 3) {
+                alert('❌ Tối thiểu 3 người chơi');
+                return;
+            }
+            if (spy + white >= total) {
+                alert('❌ Số Gián điệp + Mũ trắng phải < tổng số người');
+                return;
+            }
+
+            gameState.totalPlayers = total;
+            gameState.spyCount = spy;
+            gameState.whiteCount = white;
+
+            const container = document.getElementById('nameInputContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < total; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = `Người chơi ${i + 1}`;
+                input.value = `Người chơi ${i + 1}`;
+                input.id = `playerName${i}`;
+                container.appendChild(input);
+            }
+
+            showScreen('nameInput');
+        }
+
+        function startGame() {
+            // Collect names
+            gameState.players = [];
+            for (let i = 0; i < gameState.totalPlayers; i++) {
+                gameState.players.push({
+                    name: document.getElementById(`playerName${i}`).value || `Người chơi ${i + 1}`,
+                    role: '',
+                    word: '',
+                    alive: true,
+                    index: i
+                });
+            }
+
+            // Assign roles
+            const civilians = gameState.totalPlayers - gameState.spyCount - gameState.whiteCount;
+            const roles = Array(civilians).fill('Dân thường')
+                .concat(Array(gameState.spyCount).fill('Gián điệp'))
+                .concat(Array(gameState.whiteCount).fill('Mũ trắng'));
+
+            // Shuffle roles
+            for (let i = roles.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [roles[i], roles[j]] = [roles[j], roles[i]];
+            }
+
+            // Pick random word pair
+            const pair = gameState.wordPairs[Math.floor(Math.random() * gameState.wordPairs.length)];
+            const flip = Math.random() > 0.5;
+            const [wordA, wordB] = flip ? [pair[0], pair[1]] : [pair[1], pair[0]];
+
+            // Assign words and roles
+            gameState.players.forEach((player, index) => {
+                player.role = roles[index];
+                if (player.role === 'Dân thường') {
+                    player.word = wordA;
+                } else if (player.role === 'Gián điệp') {
+                    player.word = wordB;
+                } else {
+                    player.word = '???';
+                }
+            });
+
+            gameState.currentRevealIndex = 0;
+            gameState.currentWord = wordA;
+            showWordReveal();
+        }
+
+        function showWordReveal() {
+            if (gameState.currentRevealIndex >= gameState.totalPlayers) {
+                showDiscussion();
+                return;
+            }
+
+            const player = gameState.players[gameState.currentRevealIndex];
+            if (!player.alive) {
+                gameState.currentRevealIndex++;
+                showWordReveal();
+                return;
+            }
+
+            document.getElementById('playerNameDisplay').textContent = player.name;
+            document.getElementById('statusText').textContent = '🔐 Chuyền máy để xem từ bí mật';
+            document.getElementById('wordDisplay').style.display = 'none';
+            document.getElementById('revealBtn').style.display = 'block';
+            document.getElementById('nextBtn').style.display = 'none';
+
+            showScreen('wordReveal');
+        }
+
+        function revealWord() {
+            const player = gameState.players[gameState.currentRevealIndex];
+            document.getElementById('wordText').textContent = player.word;
+            document.getElementById('wordDisplay').style.display = 'block';
+            document.getElementById('statusText').textContent = '👆 Bạn đã xem được từ';
+            document.getElementById('revealBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'block';
+        }
+
+        function nextPlayer() {
+            gameState.currentRevealIndex++;
+            showWordReveal();
+        }
+
+        function randomizeOrder() {
+            const alive = gameState.players.filter(p => p.alive);
+            for (let i = alive.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [alive[i], alive[j]] = [alive[j], alive[i]];
+            }
+            return alive;
+        }
+
+        function showDiscussion() {
+            const order = randomizeOrder();
+            const orderText = order.map(p => p.name).join(' ➔ ');
+            document.getElementById('orderList').textContent = orderText;
+
+            const container = document.getElementById('playersContainer');
+            container.innerHTML = '';
+            gameState.players.forEach((player, index) => {
+                if (player.alive) {
+                    const div = document.createElement('div');
+                    div.className = 'player-item';
+                    div.innerHTML = `
+                        <div class="player-name-text">${player.name}</div>
+                        <button class="btn-danger" style="width:100%; margin-top:10px; padding:8px;" 
+                            onclick="eliminatePlayer(${index})">❌ LOẠI ${player.name}</button>
+                    `;
+                    container.appendChild(div);
+                }
+            });
+
+            showScreen('discussion');
+        }
+
+        function eliminatePlayer(index) {
+            if (confirm(`❓ Bạn chắc chắn loại ${gameState.players[index].name}?`)) {
+                gameState.players[index].alive = false;
+                alert(`✅ Đã loại ${gameState.players[index].name}. Thứ tự phát biểu đã được xáo trộn!`);
+                showDiscussion();
+            }
+        }
+
+        function showFinalResult() {
+            const container = document.getElementById('resultContainer');
+            container.innerHTML = '';
+
+            gameState.players.forEach((player, index) => {
+                const div = document.createElement('div');
+                div.className = 'result-text';
+
+                let badgeClass = 'civilian';
+                if (player.role === 'Gián điệp') badgeClass = 'spy';
+                else if (player.role === 'Mũ trắng') badgeClass = 'white';
+
+                div.innerHTML = `
+                    <div class="result-name">🎭 ${player.name}</div>
+                    <div>Vai trò: <span class="badge ${badgeClass}">${player.role}</span></div>
+                    <div style="margin-top:8px; color:#b0b8ff;">Từ: <strong>${player.word}</strong></div>
+                `;
+                container.appendChild(div);
+            });
+
+            showScreen('finalResult');
+        }
+
+        function restartGame() {
+            gameState.currentRevealIndex = 0;
+            startGame();
+        }
+
+        // ============ INIT ============
+        async function init() {
+            await loadWords();
+            console.log('🎮 Game initialized!');
+        }
+
+        init();
+    </script>
+</body>
+</html>
